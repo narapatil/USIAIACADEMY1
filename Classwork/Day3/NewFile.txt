@@ -1,0 +1,10 @@
+['Africa', 'India', 'Afghanistan', 'Angola']Africa
+India
+Afghanistan
+Angola
+Aus
+Albania
+Italy
+Paris
+Argentina
+Russia
