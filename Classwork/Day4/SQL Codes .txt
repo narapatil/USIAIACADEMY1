@@ -1,3 +1,4 @@
+https://livesql.oracle.com/apex/f?p=590:1000 # site
 create table country(name varchar(100));
 create database deloitteai
 show databases;
