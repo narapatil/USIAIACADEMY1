@@ -1,0 +1,78 @@
+SELECT ACCOUNT_NO, TRANS_AMT FROM BANK_SB_ACCOUNT, BANK_TRANSACTION 
+WHERE TRANS_ACC_NO=ACCOUNT_NO
+AND TRANS_TYPE='DB'
+AND TRANS_AMT>(SELECT AVG(TRANS_AMT)
+FROM BANK_TRANSACTION WHERE TRANS_ACC_NO=ACCOUNT_NO);
+
+SQL CODING QUESTIONS
+Q1 List the SB account no.(s) on which no transactions have been made so far (Use NOT EXISTS clause in the query)
+
+SELECT ACCOUNT_NO FROM BANK_SB_ACCOUNT WHERE NOT EXISTS(SELECT * FROM BANK_TRANSACTION WHERE BANK_SB_ACCOUNT.ACCOUNT_NO=BANK_TRANSACTION.TRANS_ACC_NO );
+
+Q2Show details (account no & transaction amount) of those SB a/c debit transactions whose amount is more than the average transaction amount of that S/B account.
+
+SELECT ACCOUNT_NO,TRANS_AMT FROM BANK_SB_ACCOUNT,BANK_TRANSACTION WHERE ACCOUNT_NO=TRANS_ACC_NO AND TRANS_TYPE='DB' AND TRANS_AMT>(SELECT AVG(TRANS_AMT) FROM BANK_TRANSACTION WHERE TRANS_ACC_NO=ACCOUNT_NO);
+
+Q3 Which individual customer(s) have not provided their home phone no.? Display their cust id and first name. Hint: Customer Type should be "IND" and Contact Type should be "OFFICE"
+--CONTACT TYPE ONLY HOME---CORRECTION
+
+SELECT BANK_CUSTOMER.CUST_ID,CUST_FNAME FROM BANK_CUSTOMER,BANK_CUST_CONTACT
+WHERE (BANK_CUST_CONTACT.CUST_ID=BANK_CUSTOMER.CUST_ID
+AND BANK_CUSTOMER.CUST_TYPE='IND' AND BANK_CUSTOMER.CUST_ID NOT IN(SELECT CUST_ID FROM BANK_CUST_CONTACT WHERE CONTACT_TYPE ='OFFICE') );
+
+Q4 Show transaction details – SB a/c no., transaction type, date, description and amount, for transaction amounts > 1000. Sort the output based on a/c no, transaction type and date.
+
+SELECT ACCOUNT_NO,TRANS_TYPE AS TR,TRANS_DT,TRANS_DESC,TRANS_AMT
+FROM BANK_SB_ACCOUNT,BANK_TRANSACTION
+WHERE ACCOUNT_NO=TRANS_ACC_NO 
+AND TRANS_AMT>1000
+ORDER BY ACCOUNT_NO,TRANS_TYPE,TRANS_DT;
+
+Q5. Write a query to show bank employee id, name, designation and transaction description of all managers and assistant managers even though they are not involved in any transaction updates.
+
+SELECT BANK_EMPLOYEE.BANK_EMP_ID,BANK_EMPLOYEE.EMP_NAME,
+BANK_EMPLOYEE.DESIGNATION,BANK_TRANSACTION.TRANS_DESC
+FROM BANK_EMPLOYEE
+LEFT JOIN BANK_TRANSACTION
+ON BANK_TRANSACTION.BANK_EMP_ID=BANK_EMPLOYEE.BANK_EMP_ID
+WHERE DESIGNATION='MANAGER'
+OR DESIGNATION='ASST. MGR.';
+
+Q6.  Fetch the user information who has not returned the toys after the rental period
+
+SELECT CUSTOMER.CUSTOMER_ID,CUSTOMER.CUSTOMER_NAME,
+CUSTOMER.PASSWORD,CUSTOMER.CITY,CUSTOMER.STATE,CUSTOMER.ZIP,
+CUSTOMER.COUNTRY FROM CUSTOMER 
+JOIN TOY_RENTAL
+ON CUSTOMER.CUSTOMER_ID=TOY_RENTAL.CUSTOMER_ID
+WHERE TOY_RENTAL.STATUS='Pending';
+
+
+Q7.  Identify the top 2 preferred customers in descending order of max revenue generated.
+
+SELECT CUSTOMER_NAME FROM (SELECT CUSTOMER_ID,SUM(TOTAL_AMOUNT) AMT 
+FROM TOY_RENTAL GROUP BY CUSTOMER_ID ORDER BY AMT DESC)
+NATURAL JOIN CUSTOMER WHERE ROWNUM<=2;
+
+Q8. Display fist name , city , total rent amount of the month for the user whose rental amount is maximum for the month.
+Note: Consider the month is Dec 2020 and sort the output based on firstname
+-> use joins , subquery, date function and group function
+
+ SELECT * FROM (SELECT U.FIRST_NAME,U.CITY,SUM(B.TOTAL_AMOUNT) TOTAL_RENT_AMOUNT
+ FROM USER_DETAILS U JOIN BOOK_RENTAL B ON U.USER_ID=B.USER_ID
+ WHERE TO_CHAR(B.RENTAL_START_DATE,'MON')='DEC' GROUP BY U.FIRST_NAME,U.CITY
+ ORDER BY U.FIRST_NAME)
+ WHERE ROWNUM=1;
+
+Q9. Fetch the user information who has not returned the books after the rental period
+note: use subquery/ joins and date function
+
+SELECT * FROM USER_DETAILS WHERE USER_ID IN (SELECT USER_ID FROM BOOK_RENTAL WHERE ISRETURNED='no' ) ;
+
+Q10. 1.     Display the users whose rides to location is in “Bangalore/Bangalore Airport /Electronic City”.
+
+SELECT * FROM USER_DETAILS 
+WHERE USER_ID IN 
+(SELECT RIDE_PROVIDER_ID 
+FROM RIDE 
+WHERE TO_LOCATION IN('Bangalore','Bangalore Airport','Electronic City'));
